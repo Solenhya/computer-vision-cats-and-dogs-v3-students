@@ -65,7 +65,7 @@ services:
     # - no : pas de redémarrage automatique (dev uniquement)
     
     env_file:
-      - ../.env
+      - "../.env"
     # 📁 Charge les variables d'environnement depuis .env (un niveau au-dessus)
     # Bonne pratique : séparer secrets (.env, gitignored) et configuration (docker-compose)
     
@@ -114,7 +114,7 @@ services:
       # 🏥 HEALTHCHECK : Vérification automatique de l'état du service
       # Essentiel pour depends_on avec condition (voir cv_app ci-dessous)
       
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-catsdogs}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-catsdogs} -d ${DB_NAME:-cats_dogs_db}_${STUDENT_ID:-student01}"]
       # 🩺 Commande de test : pg_isready (utilitaire PostgreSQL)
       # Vérifie que le serveur accepte les connexions
       # Format CMD-SHELL : exécute dans un shell (permet variables d'env)
@@ -284,6 +284,12 @@ services:
   # - prediction_duration_seconds : latence d'inférence
   # - model_accuracy : précision du modèle
   # ═══════════════════════════════════════════════════════════════════════════
+  postgres_exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://user:pass@postgres:5432/db?sslmode=disable"
+    ports:
+      - "9187:9187"
   prometheus:
     image: prom/prometheus:latest
     # 📦 Image officielle Prometheus (maintenue par la CNCF)

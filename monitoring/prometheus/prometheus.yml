@@ -197,26 +197,7 @@ scrape_configs:
   # ─────────────────────────────────────────────────────────────────────────
   - job_name: 'postgres'
     static_configs:
-      - targets: ['postgres:5432']
-        # ⚠️ ATTENTION : CONFIGURATION INCOMPLÈTE
-        # PostgreSQL n'expose PAS nativement /metrics Prometheus
-        # 
-        # 💡 SOLUTION : postgres_exporter
-        # Sidecar container convertissant stats PostgreSQL → format Prometheus
-        # 
-        # 🔧 IMPLÉMENTATION COMPLÈTE (à ajouter)
-        # Dans docker-compose.yml :
-        #   postgres_exporter:
-        #     image: quay.io/prometheuscommunity/postgres-exporter
-        #     environment:
-        #       DATA_SOURCE_NAME: "postgresql://user:pass@postgres:5432/db?sslmode=disable"
-        #     ports:
-        #       - "9187:9187"
-        #
-        # Dans prometheus.yml :
-        #   - job_name: 'postgres'
-        #     static_configs:
-        #       - targets: ['postgres_exporter:9187']
+      - targets: ['postgres_exporter:9187']
         #
         # 📊 MÉTRIQUES POSTGRES UTILES
         # - pg_stat_database_tup_inserted : lignes insérées (monitoring feedbacks)

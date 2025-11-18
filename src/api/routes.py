@@ -274,7 +274,7 @@ async def predict_api(
         image_data = await file.read()
         # 📥 Lecture asynchrone du fichier uploadé (bytes)
         
-        file_size = get_open_file_size(image_data)
+        file_size = len(image_data)
         if ENABLE_PROMETHEUS:
             track_input_file_size(file_size)
 

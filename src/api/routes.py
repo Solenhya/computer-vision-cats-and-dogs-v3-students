@@ -705,7 +705,7 @@ def get_open_file_size(file: UploadFile) -> int:
     Returns:
         Taille du fichier en octets
     """
-    file.file.seek(0, os.SEEK_END)  # Aller à la fin du fichier
+    file.seek(0, os.SEEK_END)  # Aller à la fin du fichier
     size = file.file.tell()          # Obtenir la position (taille)
     file.file.seek(0)                # Revenir au début du fichier
     return size

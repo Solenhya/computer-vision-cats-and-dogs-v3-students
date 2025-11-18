@@ -102,6 +102,7 @@ if ENABLE_PROMETHEUS:
         # 🔄 Renommage avec underscore pour éviter shadowing (bonne pratique)
         update_db_status = _update_db_status
         from src.monitoring.prometheus_metrics import track_inference_time
+        from src.monitoring.prometheus_metrics import track_user_feedback
         print("✅ Prometheus tracking functions loaded")
     except ImportError as e:
         ENABLE_PROMETHEUS = False  # Désactivation silencieuse
@@ -439,6 +440,10 @@ async def update_feedback(
         
         # 💾 Commit en base
         db.commit()
+
+        # Ajout du monitoring Prometheus (V3)
+        if ENABLE_PROMETHEUS:
+            track_feedback(user_feedback)
         
     except HTTPException:
         raise  # Propage les HTTPException définies ci-dessus

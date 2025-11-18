@@ -117,6 +117,16 @@ def track_inference_time(inference_time_ms: float):
     """Enregistre le temps d'inférence"""
     inference_time_histogram.observe(inference_time_ms / 1000)
 
+feedback_counter = Counter(
+    'cv_user_feedback_total',
+    'Nombre de feedbacks utilisateurs',
+    ['feedback_type']  # 'positive' ou 'negative'
+)
+def track_user_feedback(feedback_type: str):
+    """Incrémente le compteur de feedback utilisateur"""
+    feedback_counter.labels(feedback_type=feedback_type).inc()
+    
+
 # ═══════════════════════════════════════════════════════════════════════════
 # 🎓 CONCEPTS AVANCÉS (pour aller plus loin)
 # ═══════════════════════════════════════════════════════════════════════════

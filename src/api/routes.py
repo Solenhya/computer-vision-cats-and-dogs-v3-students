@@ -443,7 +443,11 @@ async def update_feedback(
 
         # Ajout du monitoring Prometheus (V3)
         if ENABLE_PROMETHEUS:
-            track_feedback(user_feedback)
+            if(user_feedback == 0):
+                user_feedback = "negative"
+            else:
+                user_feedback = "positive"
+            track_user_feedback(user_feedback)
         
     except HTTPException:
         raise  # Propage les HTTPException définies ci-dessus

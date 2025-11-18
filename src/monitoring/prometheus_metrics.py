@@ -125,7 +125,26 @@ feedback_counter = Counter(
 def track_user_feedback(feedback_type: str):
     """Incrémente le compteur de feedback utilisateur"""
     feedback_counter.labels(feedback_type=feedback_type).inc()
-    
+
+prediction_result = Counter(
+    'cv_predictions_result',
+    'Nombre de prédictions par type',
+    ['result']  # 'cat' ou 'dog'
+)
+
+def track_prediction_result(result:str):
+    """Incrémente le compteur de prédictions"""
+    prediction_result.labels(result=result).inc()
+
+file_size_histogram = Histogram(
+    'cv_input_file_size_bytes',
+    'Taille des fichiers d\'entrée en bytes'
+    )
+
+def track_input_file_size(file_size_bytes: int):
+    """Enregistre la taille du fichier d'entrée"""
+    file_size_histogram.observe(file_size_bytes)
+
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 🎓 CONCEPTS AVANCÉS (pour aller plus loin)

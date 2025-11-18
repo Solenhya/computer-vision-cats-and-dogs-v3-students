@@ -101,8 +101,8 @@ if ENABLE_PROMETHEUS:
         )
         # 🔄 Renommage avec underscore pour éviter shadowing (bonne pratique)
         update_db_status = _update_db_status
-        from src.monitoring.prometheus_metrics import track_inference_time
-        from src.monitoring.prometheus_metrics import track_user_feedback
+        from src.monitoring.prometheus_metrics import (track_inference_time , track_input_file_size,
+                                                        track_user_feedback, track_prediction_result)
         print("✅ Prometheus tracking functions loaded")
     except ImportError as e:
         ENABLE_PROMETHEUS = False  # Désactivation silencieuse
@@ -274,6 +274,10 @@ async def predict_api(
         image_data = await file.read()
         # 📥 Lecture asynchrone du fichier uploadé (bytes)
         
+        file_size = get_open_file_size(image_data)
+        if ENABLE_PROMETHEUS:
+            track_input_file_size(file_size)
+
         result = predictor.predict(image_data)
         # 🧠 Inférence CNN (voir src/models/predictor.py)
         # result = {
@@ -288,6 +292,7 @@ async def predict_api(
         end_time = time.perf_counter()
         inference_time_ms = int((end_time - start_time) * 1000)
         track_inference_time(inference_time_ms)
+        track_prediction_result(result["prediction"].lower())
         # Conversion secondes → millisecondes (plus lisible pour latence)
         # Typage int : évite JSON avec .567823478 ms
         
@@ -689,6 +694,21 @@ async def health_check(db: Session = Depends(get_db)):
     # 💡 STATUS CODES
     # 200 OK : retourné même si degraded (service répond)
     # Alternative : 503 si database down (force retry par LB)
+
+def get_open_file_size(file: UploadFile) -> int:
+    """
+    Obtenir la taille d'un UploadFile en octets
+    
+    Args:
+        file: Fichier uploadé via FastAPI
+    
+    Returns:
+        Taille du fichier en octets
+    """
+    file.file.seek(0, os.SEEK_END)  # Aller à la fin du fichier
+    size = file.file.tell()          # Obtenir la position (taille)
+    file.file.seek(0)                # Revenir au début du fichier
+    return size
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 🎓 PATTERNS ARCHITECTURAUX ILLUSTRÉS

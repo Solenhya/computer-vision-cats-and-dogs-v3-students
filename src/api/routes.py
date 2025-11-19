@@ -94,18 +94,24 @@ update_db_status = None
 # ─────────────────────────────────────────────────────────────────────────────
 # 📊 IMPORT PROMETHEUS (si activé)
 # ─────────────────────────────────────────────────────────────────────────────
+from src.monitoring.prometheus_metrics import track_inference_time, update_db_status
+
+'''
 if ENABLE_PROMETHEUS:
     try:
         from src.monitoring.prometheus_metrics import (
-            update_db_status as _update_db_status   # Gauge database_status
+            update_db_status as _update_db_status,   # Gauge database_status
+            track_inference_time  as _track_inference_time
         )
         # 🔄 Renommage avec underscore pour éviter shadowing (bonne pratique)
         update_db_status = _update_db_status
+        track_inference_time  = _track_inference_time
         print("✅ Prometheus tracking functions loaded")
     except ImportError as e:
         ENABLE_PROMETHEUS = False  # Désactivation silencieuse
         print(f"⚠️  Prometheus tracking not available: {e}")
         # 💡 Graceful degradation : app continue sans Prometheus
+'''
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 📢 IMPORT DISCORD (si activé)
@@ -288,6 +294,9 @@ async def predict_api(
         # Conversion secondes → millisecondes (plus lisible pour latence)
         # Typage int : évite JSON avec .567823478 ms
         
+        
+        track_inference_time(inference_time_ms)      
+        
         # ─────────────────────────────────────────────────────────────────────
         # 📊 FORMATAGE PROBABILITÉS (pour DB)
         # ─────────────────────────────────────────────────────────────────────
@@ -313,7 +322,14 @@ async def predict_api(
         
         #update_db_status(True)
         # 📝 Retourne objet ORM PredictionFeedback avec .id auto-généré
-        
+        '''
+        if ENABLE_PROMETHEUS and track_inference_time:
+            try:
+                track_inference_time(inference_time_ms)
+            except Exception as e:
+                print(f"⚠️  Prometheus tracking failed: {e}")
+                # 🛡️ Erreur non bloquante (app continue)
+        '''
         # ─────────────────────────────────────────────────────────────────────
         # 📤 RÉPONSE API (V2 - inchangé)
         # ─────────────────────────────────────────────────────────────────────
@@ -658,6 +674,9 @@ async def health_check(db: Session = Depends(get_db)):
             update_db_status(db_connected)
             # 📊 Set cv_database_connected gauge (1 ou 0)
             # Grafana peut alerter si = 0 pendant >5min
+            
+            # Exercice 1 :
+            track_inference_time(inference_time_ms)
         except Exception as e:
             print(f"⚠️  Prometheus status update failed: {e}")
     

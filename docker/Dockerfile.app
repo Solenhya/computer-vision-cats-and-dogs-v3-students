@@ -6,11 +6,9 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements/base.txt requirements/prod.txt requirements/monitoring.txt ./
+COPY requirements/monitoring.txt ./
 
 RUN pip install --no-cache-dir \
-    -r base.txt \
-    -r prod.txt \
     -r monitoring.txt
 
 COPY src/ ./src/

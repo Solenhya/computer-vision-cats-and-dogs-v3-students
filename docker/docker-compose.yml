@@ -1,174 +1,108 @@
 version: '3.8'
-
 services:
   postgres:
     image: postgres:15-alpine
-    
     container_name: cv_postgres_${STUDENT_ID:-student01}
-    
     restart: unless-stopped
-    
     env_file:
       - ../.env
-    
     environment:
-      
       POSTGRES_DB: ${DB_NAME:-cats_dogs_db}_${STUDENT_ID:-student01}
-      
       POSTGRES_USER: ${DB_USER:-catsdogs}
-      
       POSTGRES_PASSWORD: ${DB_PWD}
-    
     ports:
       - "${STUDENT_PORT_POSTGRES:-5433}:5432"
-    
     volumes:
-      
       - postgres_data:/var/lib/postgresql/data #postgres_data_${STUDENT_ID:-student01}:/var/lib/postgresql/data
-      
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
-    
     healthcheck:
-      
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-catsdogs}"]
-
+      test: ["CMD-SHELL", "pg_isready -d ${DB_NAME:-cats_dogs_db}_${STUDENT_ID:-student01} -U ${DB_USER:-catsdogs}"]
       interval: 10s
-
       timeout: 5s
-
       retries: 5
 
   cv_app:
     build:
       context: ..
-
       dockerfile: docker/Dockerfile.app
-
     container_name: cv_cats_dogs_app_${STUDENT_ID:-student01}
     restart: unless-stopped
-    
     env_file:
       - ../.env
-    
     environment:
-
       DB_HOST: postgres
-
       DB_PORT: 5432
-
       DB_NAME: ${DB_NAME:-cats_dogs_db}_${STUDENT_ID:-student01}
       DB_USER: ${DB_USER:-catsdogs}
       DB_PWD: ${DB_PWD}
-
       DB_TABLE_MONITORING: ${DB_TABLE_MONITORING:-predictions_feedback}
-
       API_TOKEN: ${API_TOKEN}
-
       ENABLE_PROMETHEUS: "true"
-
       DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
-
       STUDENT_ID: ${STUDENT_ID:-student01}
-    
     ports:
       - "${STUDENT_PORT_API:-8000}:8000"
-
     volumes:
-
       - ../data:/app/data:ro
-
       - ../models:/app/models:ro
-
     depends_on:
       postgres:
         condition: service_healthy
-
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-
       interval: 30s
-
       timeout: 10s
-
       retries: 3
 
   prometheus:
     image: prom/prometheus:latest
-    
     container_name: cv_prometheus_${STUDENT_ID:-student01}
     restart: unless-stopped
-    
     command:
-
       - '--config.file=/etc/prometheus/prometheus.yml'
-
       - '--storage.tsdb.path=/prometheus'
-
       - '--web.enable-lifecycle'
-
     ports:
       - "${STUDENT_PORT_PROMETHEUS:-9090}:9090"
-
     volumes:
       - ../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-
       - ../monitoring/prometheus/rules:/etc/prometheus/rules:ro
-
       - prometheus_data:/prometheus #prometheus_data_${STUDENT_ID:-student01}:/prometheus
-
     depends_on:
       - cv_app
 
   grafana:
     image: grafana/grafana:latest
-
     container_name: cv_grafana_${STUDENT_ID:-student01}
     restart: unless-stopped
-    
     environment:
-
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
-
       GF_PATHS_PROVISIONING: /etc/grafana/provisioning
-
       GF_UNIFIED_ALERTING_ENABLED: "true"
-
       GF_ALERTING_ENABLED: "false"
-
       GF_SERVER_ROOT_URL: "http://${VPS_HOST:-localhost}:${STUDENT_PORT_GRAFANA:-3000}"
       DB_NAME: ${DB_NAME:-cats_dogs_db}
       DB_USER: ${DB_USER:-catsdogs}
       DB_PWD: ${DB_PWD}
       STUDENT_ID: ${STUDENT_ID:-student01}
-    
     ports:
       - "${STUDENT_PORT_GRAFANA:-3000}:3000"
-
     volumes:
-
       - ../monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
-
       - ../monitoring/grafana/provisioning/dashboards/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
-
       - ../monitoring/grafana/provisioning/dashboards/cv_dashboard.json:/var/lib/grafana/dashboards/cv_dashboard.json:ro
-
       - ../monitoring/grafana/provisioning/alerting:/etc/grafana/provisioning/alerting:ro
-
       - grafana_data:/var/lib/grafana #grafana_data_${STUDENT_ID:-student01}:/var/lib/grafana
-
     depends_on:
       postgres:
         condition: service_healthy
-
       prometheus:
         condition: service_started
 
 volumes:
   postgres_data: #postgres_data_${STUDENT_ID:-student01}:
-
   prometheus_data: #prometheus_data_${STUDENT_ID:-student01}:
-
   grafana_data: #grafana_data_${STUDENT_ID:-student01}:
 
 networks:

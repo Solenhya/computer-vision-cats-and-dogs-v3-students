@@ -60,7 +60,7 @@ RUN apt-get update && apt-get install -y \
 # ═══════════════════════════════════════════════════════════════════════════════
 # 📚 INSTALLATION DÉPENDANCES PYTHON
 # ═══════════════════════════════════════════════════════════════════════════════
-COPY requirements/base.txt requirements/prod.txt requirements/monitoring.txt ./
+COPY requirements/monitoring.txt ./
 # 📋 COPIE SÉPARÉE DES REQUIREMENTS (avant le code source)
 # 
 # POURQUOI CETTE ORDRE ?
@@ -68,14 +68,9 @@ COPY requirements/base.txt requirements/prod.txt requirements/monitoring.txt ./
 # Mais si SEUL le code change → réutilise cache pip (gain de temps énorme)
 #
 # STRATÉGIE DE REQUIREMENTS
-# - base.txt : dépendances core (FastAPI, TensorFlow, SQLAlchemy)
-# - prod.txt : outils production (gunicorn, uvicorn workers)
-# - monitoring.txt : Prometheus client, psutil
-# Séparation = clarté + réutilisabilité (ex: base.txt partagé avec notebooks)
+# - monitoring.txt : dépendances core (FastAPI, TensorFlow, SQLAlchemy) + Prometheus client, psutil
 
 RUN pip install --no-cache-dir \
-    -r base.txt \
-    -r prod.txt \
     -r monitoring.txt
 # 🐍 INSTALLATION AVEC PIP
 #
@@ -83,10 +78,7 @@ RUN pip install --no-cache-dir \
 # En prod, pas besoin de cache (build une fois, run partout)
 #
 # ORDRE D'INSTALLATION
-# 1. base.txt (dépendances lourdes : TensorFlow ~400MB)
-# 2. prod.txt (léger : gunicorn, uvloop)
-# 3. monitoring.txt (léger : prometheus-client)
-# → Si monitoring change, pas de retéléchargement de TensorFlow (cache layer)
+# 1. monitoring.txt (léger : prometheus-client) + (dépendances lourdes : TensorFlow ~400MB)
 
 # 💡 ALTERNATIVE POUR TRÈS GROSSES IMAGES
 # Multi-stage build (non nécessaire ici) :

@@ -1,3 +1,7 @@
+# GITHUB ACTIONS - Déploiement Continu (CD)
+
+```yml
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # 🚀 GITHUB ACTIONS - Déploiement Continu (CD)
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -316,3 +320,5 @@ jobs:
 # - CI/CD patterns: https://www.martinfowler.com/articles/continuousIntegration.html
 #
 # ═══════════════════════════════════════════════════════════════════════════════
+
+``` 

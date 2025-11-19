@@ -4,6 +4,23 @@
 
 Vous avez été assigné : **STUDENTXX** (remplacer XX par votre numéro)
 
+## Votre Serveur Discord
+
+### Étape 1 : Créer votre propre serveur Discord
+
+- Dans Discord, ajouter un serveur : Créer le mien →  Pour mes amis et moi → Renseigner le nom du serveur.
+- Ajouter un salon : type Texte → Renseigner le nom du salon.
+- Modifier le salon : Intégrations → Créer un webhook → Renseigner le nom du webhook → Copier l'URL du webhook (de type `https://discord.com/api/webhooks/XXX/YYY`)
+
+### Étape 2 : Configurer les variables Grafana
+
+Actuellement la variabilisation du `provisioning` Grafana (pré-configuration) n'est pas opérationnel. Cela a pour conséquence de :
+
+- Modifier l'URL du webhook discord, dans `monitoring/grafana/provisioning/alerting/contact-points.yml` :
+
+  - Accéder au champ `url`.
+  - Remplacer la valeur par défaut par l'URL de votre propre serveur Discord.
+
 ## URLs d'Accès
 
 Après déploiement, vos services seront accessibles sur :
@@ -45,6 +62,7 @@ Après déploiement, vos services seront accessibles sur :
 ### Étape 2 : Configurer les Secrets GitHub
 
 Dans **votre repository** forké :
+
 1. Settings → Secrets and variables → Actions
 2. New repository secret
 
@@ -62,6 +80,7 @@ Créer **8 secrets** :
 | `GH_TOKEN` | *Votre token créé à l'étape 1* |
 
 ### Étape 3 : Premier Déploiement
+
 ```bash
 git add .
 git commit -m "Initial setup for studentXX"
@@ -71,6 +90,7 @@ git push origin main
 GitHub Actions se lance automatiquement → Vérifier dans l'onglet **Actions**
 
 ## Accès SSH au VPS (Debug)
+
 ```bash
 ssh ubuntu@51.91.251.234
 cd ~/apps/VOTRE-REPO-NAME-studentXX/docker
@@ -79,6 +99,7 @@ docker compose -p cv-studentXX logs
 ```
 
 ⚠️ **Règle** : Ne toucher qu'à vos propres containers (`cv-studentXX`)
+⚠️ **Crédentials** : Il existe sur le serveur un fichier `.env` pour chaque étudiant (exemple : `.env.student01`) qui contient les variabels d'environnement préalablement configurées par le formateur. Il est conseillé d'avoir les mêmes déclarations entre la configuration locale et serveur. A défaut, il conviendra de modifier sur le serveur le ficher de l'étudiant (exemple : `.env.student01`).
 
 ## Aide
 

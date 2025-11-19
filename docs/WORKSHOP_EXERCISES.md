@@ -9,6 +9,7 @@ Ajouter progressivement des métriques de monitoring à l'application de classif
 ## 📊 Exercice 1 : Métrique Latence d'Inférence (Jour 1-2)
 
 ### Objectif
+
 Monitorer le temps de réponse des prédictions.
 
 ### Fichiers à Modifier
@@ -16,6 +17,7 @@ Monitorer le temps de réponse des prédictions.
 #### 1. `src/monitoring/prometheus_metrics.py`
 
 **Ajouter** :
+
 ```python
 # TODO: Créer métrique histogram pour latence
 inference_time_histogram = Histogram(
@@ -28,9 +30,10 @@ def track_inference_time(inference_time_ms: float):
     inference_time_histogram.observe(inference_time_ms / 1000)
 ```
 
-#### 2. `src/routes.py`
+#### 2. `src/api/routes.py`
 
 Dans la fonction `predict()`, **ajouter** :
+
 ```python
 # TODO: Mesurer et tracker le temps d'inférence
 start_time = time.time()
@@ -39,9 +42,13 @@ inference_time_ms = (time.time() - start_time) * 1000
 track_inference_time(inference_time_ms)
 ```
 
-#### 3. `monitoring/prometheus/rules/alerts.yml`
+#### 3. `monitoring/prometheus/rules/alerts.yml` (optionnel)
+
+Cette section est optionnelle car les alertes sont également configurées et utilisées dans Grafana.
+Mais la section montre comment déclarer une alerte dans la configuration Prometheus.
 
 **Ajouter** :
+
 ```yaml
   - alert: alert_high_latency
     expr: rate(cv_inference_time_seconds_sum[5m]) / rate(cv_inference_time_seconds_count[5m]) > 2
@@ -58,6 +65,7 @@ track_inference_time(inference_time_ms)
 **Ajouter l'alerte** (voir exemple dans le dashboard actuel)
 
 ### Déployer
+
 ```bash
 git add .
 git commit -m "feat: Add inference_time metric"
@@ -76,11 +84,13 @@ git push origin main
 ## 📝 Exercice 2 : Métrique Feedback Utilisateur (Jour 3)
 
 ### Objectif
+
 Tracker les retours utilisateurs (positifs/négatifs).
 
 ### À Implémenter
 
 1. **Métrique Prometheus** :
+
 ```python
 feedback_counter = Counter(
     'cv_user_feedback_total',
@@ -123,6 +133,7 @@ Choisir **2 métriques** parmi :
 ### Tests Automatisés dans CI/CD
 
 Ajouter dans `.github/workflows/deploy.yml` **AVANT** le déploiement :
+
 ```yaml
   test:
     runs-on: ubuntu-latest

@@ -61,7 +61,7 @@ jobs:
 
       - name: Save image to tar
         run: |
-          IMAGE_NAME=my-app:${{ github.sha }}
+          IMAGE_NAME=cv-app:${{ github.sha }}
           mkdir -p out
           docker save "$IMAGE_NAME" -o out/image.tar
 

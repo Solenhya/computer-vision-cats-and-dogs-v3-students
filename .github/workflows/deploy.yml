@@ -57,7 +57,7 @@ jobs:
       - name: Build image and load into local Docker
         run: |
           IMAGE_NAME=cv-app:${{ github.sha }}
-          docker buildx build --file docker/docker.app --load --tag "$IMAGE_NAME" .
+          docker buildx build --file docker/Dockerfile.app --load --tag "$IMAGE_NAME" .
 
       - name: Save image to tar
         run: |

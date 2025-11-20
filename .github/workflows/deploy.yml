@@ -66,16 +66,22 @@ jobs:
           IMAGE_NAME=cv-app-${{ secrets.STUDENT_ID }}:latest
           docker buildx build --load --file docker/Dockerfile.app --load --tag "$IMAGE_NAME" .
 
+      - name: Create .env for docker-compose
+        run: |
+          cat > .env <<EOF
+          STUDENT_ID=${{ secrets.STUDENT_ID }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PWD=${{ secrets.DB_PWD }}
+          GRAFANA_ADMIN_USER=${{ secrets.GRAFANA_ADMIN_USER }}
+          GRAFANA_ADMIN_PWD=${{ secrets.GRAFANA_ADMIN_PWD }}
+          EOF
+
       - name: Lance le container pour tester
-        env:
-          STUDENT_ID: ${{ secrets.STUDENT_ID }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PWD: ${{ secrets.DB_PWD }}
-          
+
         run: |
           IMAGE_NAME=cv-app-${{ secrets.STUDENT_ID }}:latest
-          docker compose -f docker/docker-compose-prod.yml up -d
+          docker compose --env-file=../.env -f docker/docker-compose-prod.yml up -d
 
 
       - name: Push the Docker image

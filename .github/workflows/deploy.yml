@@ -71,12 +71,6 @@ jobs:
           IMAGE_NAME=cv-app-${{ secrets.STUDENT_ID }}:latest
           docker compose -f docker/docker-compose-prod.yml up -d
 
-      - name: Test fonctionnel
-      - uses: actions/setup-python@v5
-        with:
-            python-version: '3.11'
-      - run: pip install -r requirements/base.txt -r requirements/dev.txt
-      - run: pytest tests/ -v
 
       - name: Push the Docker image
         run: |

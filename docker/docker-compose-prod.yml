@@ -154,16 +154,8 @@ services:
   # - Consommé par : prometheus (scraping métriques), utilisateurs (HTTP)
   # ═══════════════════════════════════════════════════════════════════════════
   cv_app:
-    build:
-      context: ..
-      # 📂 Contexte de build = répertoire parent (racine du projet)
-      # Permet d'accéder à src/, requirements/, models/ lors du build
-      # Le Dockerfile peut alors COPY ../src → /app/src
-      
-      dockerfile: docker/Dockerfile.app
-      # 📄 Chemin relatif au contexte (..) du Dockerfile à utiliser
-      # Séparation propre : configs Docker dans docker/, code dans src/
-    
+    #Recupere l'image construite précédemment du registry
+    image: cv-app-${{STUDENT_ID:-student06}}:latest
     container_name: cv_cats_dogs_app_${STUDENT_ID:-student01}
     restart: unless-stopped
     

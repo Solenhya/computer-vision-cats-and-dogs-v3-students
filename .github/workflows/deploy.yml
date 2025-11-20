@@ -54,22 +54,33 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
     
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build image and load into local Docker
         run: |
-          IMAGE_NAME=cv-app:${{ github.sha }}
-          docker buildx build --file docker/Dockerfile.app --load --tag "$IMAGE_NAME" .
+          IMAGE_NAME=cv-app-${{ secrets.STUDENT_ID }}:latest
+          docker buildx build --load --file docker/Dockerfile.app --load --tag "$IMAGE_NAME" .
 
-      - name: Save image to tar
+      - name: Lance le container pour tester
         run: |
-          IMAGE_NAME=cv-app:${{ github.sha }}
-          mkdir -p out
-          docker save "$IMAGE_NAME" -o out/image.tar
+          IMAGE_NAME=cv-app-${{ secrets.STUDENT_ID }}:latest
+          docker compose -f docker/docker-compose-prod.yml up -d
 
-      - name: Upload built image as artifact
-        uses: actions/upload-artifact@v4
+      - name: Test fonctionnel
+      - uses: actions/setup-python@v5
         with:
-          name: built-image-tar
-          path: out/image.tar
+            python-version: '3.11'
+      - run: pip install -r requirements/base.txt -r requirements/dev.txt
+      - run: pytest tests/ -v
+
+      - name: Push the Docker image
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/cv-app-${{ secrets.STUDENT_ID }}:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -125,6 +136,16 @@ jobs:
       # ───────────────────────────────────────────────────────────────────────
       # ÉTAPE 3 : Déploiement sur le VPS
       # ───────────────────────────────────────────────────────────────────────
+      - name: Pull app image
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} bash << 'ENDSSH'
+            set -e
+
+            echo "📥 Pull Docker image from GitHub Container Registry..."
+            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+            docker pull ghcr.io/${{ github.repository_owner }}/cv-app-${{ secrets.STUDENT_ID }}:latest
+          ENDSSH
+
       - name: 📦 Deploy to VPS
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
@@ -165,13 +186,9 @@ jobs:
             # Arrêter les containers existants
             docker compose -p cv-${STUDENT_ID} down 2>/dev/null || true
             
-            # Build
-            echo "🔨 Build des images..."
-            docker compose -p cv-${STUDENT_ID} build --no-cache
-            
             # Up
             echo "🚀 Démarrage des containers..."
-            docker compose -p cv-${STUDENT_ID} up -d
+            docker compose -f docker-compose-prod.yml -p cv-${STUDENT_ID} up -d
             
             # Attendre que les services démarrent
             echo "⏳ Attente du démarrage..."

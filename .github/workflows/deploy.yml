@@ -87,11 +87,20 @@ jobs:
           IMAGE_NAME=cv-app-${{ secrets.STUDENT_ID }}:latest
           docker compose --env-file=./.env -f docker/docker-compose-prod.yml up -d
 
+      #Car la gestion des uppercase est au chou on passe par une action de traitement
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/cv-app-${{ secrets.STUDENT_ID }}:latest
 
       - name: Push the Docker image
-        run: |
-          IMAGE_NAME=$(echo "cv-app-${{ secrets.STUDENT_ID }}:latest" | tr '[:upper:]' '[:lower:]')
-          docker push "$IMAGE_NAME"
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: docker/Dockerfile.app
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
 
 
   deploy:

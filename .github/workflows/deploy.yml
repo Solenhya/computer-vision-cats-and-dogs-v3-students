@@ -164,8 +164,8 @@ jobs:
             set -e
 
             echo "📥 Pull Docker image from GitHub Container Registry..."
-            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-            IMAGE_NAME=$(echo "ghcr.io/${{ github.repository_owner }}/cv-app-${{ secrets.STUDENT_ID }}:latest" | tr '[:upper:]' '[:lower:]')
+            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN}}
+            IMAGE_NAME=$(echo "ghcr.io/${{ github.repository_owner }}/cv-app-${{ secrets.STUDENT_ID }}:main" | tr '[:upper:]' '[:lower:]')
             docker pull "$IMAGE_NAME"
           ENDSSH
 

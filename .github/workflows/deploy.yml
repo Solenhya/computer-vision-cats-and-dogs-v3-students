@@ -80,7 +80,7 @@ jobs:
           DB_PWD=${{ secrets.DB_PWD }}
           GRAFANA_ADMIN_USER=${{ secrets.GRAFANA_ADMIN_USER }}
           GRAFANA_ADMIN_PWD=${{ secrets.GRAFANA_ADMIN_PWD }}
-          IMAGE_NAME=cv-app-${{ secrets.STUDENT_ID }}:latest
+          IMAGE_NAME=cv-app-${{ secrets.STUDENT_ID }}
           EOF
 
       - name: Lance le container pour tester

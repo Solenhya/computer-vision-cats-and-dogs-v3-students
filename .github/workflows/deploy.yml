@@ -68,7 +68,7 @@ jobs:
 
       - name: Build image and load into local Docker
         run: |
-          IMAGE_NAME=cv-app-${{ secrets.STUDENT_ID }}:latest
+          IMAGE_NAME=cv-app-${{ secrets.STUDENT_ID }}:main
           docker buildx build --load --file docker/Dockerfile.app --load --tag "$IMAGE_NAME" .
 
       - name: Create .env for docker-compose

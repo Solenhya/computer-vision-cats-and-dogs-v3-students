@@ -85,7 +85,7 @@ jobs:
 
       - name: Lance le container pour tester
         run: |
-          IMAGE_NAME=cv-app-${{ secrets.STUDENT_ID }}:latest
+          IMAGE_NAME=cv-app-${{ secrets.STUDENT_ID }}
           docker compose --env-file=./.env -f docker/docker-compose-prod.yml up -d
 
       #Car la gestion des uppercase est au chou on passe par une action de traitement

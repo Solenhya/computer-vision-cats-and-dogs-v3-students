@@ -80,6 +80,7 @@ jobs:
           DB_PWD=${{ secrets.DB_PWD }}
           GRAFANA_ADMIN_USER=${{ secrets.GRAFANA_ADMIN_USER }}
           GRAFANA_ADMIN_PWD=${{ secrets.GRAFANA_ADMIN_PWD }}
+          IMAGE_NAME=cv-app-${{ secrets.STUDENT_ID }}:latest
           EOF
 
       - name: Lance le container pour tester
@@ -92,7 +93,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository_owner }}/cv-app-${{ secrets.STUDENT_ID }}:latest
+          images: ghcr.io/${{ github.repository_owner }}/cv-app-${{ secrets.STUDENT_ID }}
 
       - name: Push the Docker image
         uses: docker/build-push-action@v4

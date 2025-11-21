@@ -155,7 +155,7 @@ services:
   # ═══════════════════════════════════════════════════════════════════════════
   cv_app:
     #Recupere l'image construite précédemment du registry
-    image: "${IMAGE_NAME}:latest"
+    image: "${IMAGE_NAME}:main"
     
     container_name: cv_cats_dogs_app_${STUDENT_ID:-student01}
     restart: unless-stopped
